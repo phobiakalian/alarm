@@ -1,4 +1,3 @@
-# build.yml (diperbaiki)
 name: Alarm APK
 on: [push, workflow_dispatch]
 
@@ -17,12 +16,13 @@ jobs:
         sudo apt update
         sudo apt install -y git unzip openjdk-17-jdk-headless libncurses6 libssl-dev zlib1g-dev autoconf libtool pkg-config
 
-    - name: Install Buildozer
-      run: pip install buildozer cython
+    - name: Install Buildozer & compatible Cython
+      run: |
+        # ✅ Critical: Cython < 3 untuk kompatibilitas dengan python-for-android
+        pip install buildozer "cython<3" pkgconfig setuptools
 
     - name: Build APK
       run: |
-        # Pastikan spec file ada
         test -f buildozer.spec || (echo "❌ buildozer.spec tidak ditemukan!" && exit 1)
         buildozer android debug
 
