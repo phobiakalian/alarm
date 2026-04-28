@@ -13,6 +13,7 @@ import os
 import time
 from datetime import datetime, timedelta
 import plyer  # Untuk notifikasi & vibrator
+from jnius import autoclass
 
 class AlarmApp(App):
     def __init__(self, **kwargs):
@@ -179,13 +180,21 @@ class AlarmApp(App):
             # Vibrate (Android)
             if platform == 'android':
                 try:
-                    from jnius import autoclass
+                    PythonActivity = autoclass('org.kivy.android.PythonActivity')
                     Context = autoclass('android.content.Context')
                     Vibrator = autoclass('android.os.Vibrator')
-                    vibrator = self._android_activity.getSystemService(Context.VIBRATOR_SERVICE)
-                    vibrator.vibrate(1000)
-                except:
-                    pass
+                    
+                    activity = PythonActivity.mActivity
+                    vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE)
+                    
+                    from android import api_version
+                    if api_version >= 26:
+                        VibrationEffect = autoclass('android.os.VibrationEffect')
+                        vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
+                    else:
+                        vibrator.vibrate(1000)
+                except Exception as e:
+                    print(f"Vibrate error: {e}")
     
     def stop_alarm(self, instance):
         self.is_ringing = False

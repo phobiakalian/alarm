@@ -1,33 +1,32 @@
+# build.yml (diperbaiki)
 name: Alarm APK
 on: [push, workflow_dispatch]
+
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04  # Lebih stabil untuk Android NDK
     steps:
     - uses: actions/checkout@v4
+
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - run: |
-        pip install buildozer kivy plyer
-        sudo apt update && sudo apt install -y git unzip openjdk-17-jdk-headless python3-pip libncurses6 libssl-dev
-    - run: |
-        rm -rf bin/ .buildozer/
-        run: |
-        cat > buildozer.spec << 'EOF'
-        [app]
-        title = AlarmKu
-        package.name = alarmku
-        package.domain = org.phobiakalian.alarmku
-        requirements = python3,kivy,plyer
-        android.permissions = VIBRATE,WAKE_LOCK
-        android.api = 33
-        android.ndk = 25b
-        log_level = 2
-        EOF
-        pip install buildozer
+
+    - name: Install system dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git unzip openjdk-17-jdk-headless libncurses6 libssl-dev zlib1g-dev autoconf libtool pkg-config
+
+    - name: Install Buildozer
+      run: pip install buildozer cython
+
+    - name: Build APK
+      run: |
+        # Pastikan spec file ada
+        test -f buildozer.spec || (echo "❌ buildozer.spec tidak ditemukan!" && exit 1)
         buildozer android debug
+
     - uses: actions/upload-artifact@v4
       with:
-        name: AlarmKu.apk
+        name: AlarmKu-APK
         path: bin/*.apk
