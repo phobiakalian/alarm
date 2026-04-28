@@ -15,15 +15,13 @@ log_level = 2
 warn_on_root = 1
 
 [app]
-# Permissions untuk alarm
 android.permissions = WAKE_LOCK,VIBRATE,RECEIVE_BOOT_COMPLETED,USE_FULL_SCREEN_INTENT,POST_NOTIFICATIONS,INTERNET,FOREGROUND_SERVICE
 
+# Ubuntu 24.04 compatible
 android.api = 34
 android.minapi = 24
-android.targetapi = 34
-android.ndk = 26.1.10909125
+android.ndk = 25.2.9519653
 android.sdk = 34
-android.gradle_dependencies = 
 
 [buildozer]
 android.accept_sdk_license = True

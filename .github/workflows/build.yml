@@ -1,4 +1,4 @@
-name: 🚨 Build Alarm APK v4
+name: 🚨 Build Alarm APK - Ubuntu 24.04 FIXED
 
 on:
   push:
@@ -7,59 +7,50 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04  # Update ke Ubuntu 24.04
+    runs-on: ubuntu-24.04
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 Checkout
       uses: actions/checkout@v4
     
-    - name: 💾 Cache Buildozer & Dependencies
+    - name: 💾 Cache
       uses: actions/cache@v4
       with:
         path: |
           ~/.buildozer
           .buildozer
           ~/.gradle
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}-${{ hashFiles('main.py') }}
-        restore-keys: |
-          ${{ runner.os }}-buildozer-
+        key: ${{ runner.os }}-buildozer-v2-${{ hashFiles('buildozer.spec') }}
     
-    - name: 🐍 Setup Python
+    - name: 🐍 Python Setup
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: 📦 Install Dependencies
+    - name: 📦 Ubuntu 24.04 Dependencies FIXED
       run: |
         pip install --upgrade pip setuptools wheel
         pip install buildozer==1.5.0 kivy==2.3.0 plyer==2.1.0 cython
+        
         sudo apt update -qq
         sudo apt install -y -qq \
           git zip unzip openjdk-17-jdk-headless \
           python3-pip autoconf libtool pkg-config \
-          zlib1g-dev libncurses5-dev libncursesw5-dev \
-          libtinfo5 cmake libffi-dev libssl-dev \
-          libjpeg-dev libpng-dev
+          zlib1g-dev libncurses6 libtinfo6 \
+          cmake libffi-dev libssl-dev \
+          libjpeg-dev libpng-dev libgl1-mesa-dev libgles2-mesa-dev \
+          x11proto-core-dev libx11-dev libx11-xcb-dev libxcb1-dev \
+          libxcursor-dev libxdamage-dev libxext-dev libxfixes-dev \
+          libxi-dev libxrender-dev libxrandr-dev libxtst-dev \
+          libgl1-mesa-glx libglu1-mesa-dev
     
     - name: 🔨 Build APK
       run: |
         buildozer init
         buildozer -v android debug
-      env:
-        ANDROID_SDK_ROOT: $ANDROID_HOME
-        ANDROID_NDK_ROOT: $ANDROID_NDK_HOME
     
-    - name: 📤 Upload APK Artifact (v4)
-      uses: actions/upload-artifact@v4  # ✅ v4 FIX!
+    - name: 📤 Upload APK
+      uses: actions/upload-artifact@v4
       with:
-        name: AlarmKu-${{ github.run_number }}.apk
-        path: |
-          bin/*.apk
-          bin/*.aab
+        name: AlarmKu-v2-${{ github.run_number }}.apk
+        path: bin/*.apk
         retention-days: 30
-        compression-level: 6
-    
-    - name: 📊 Show APK Info
-      if: always()
-      run: |
-        ls -la bin/
-        du -sh bin/*.apk
