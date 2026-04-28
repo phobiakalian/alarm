@@ -2,14 +2,18 @@
 title = AlarmKu
 package.name = alarmku
 package.domain = org.phobiakalian.alarmku
-package.version = 1.0
+
+# ✅ VERSI APP (WAJIB ADA)
+version = 1.0
+# Opsional: jika ingin format versi build terpisah
+version.regex = (\d+\.\d+\.\d+)
+version.filename = main.py
 
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 
 requirements = python3,kivy,plyer
 
-# Permissions dengan prefix lengkap (lebih aman)
 android.permissions = android.permission.INTERNET,android.permission.VIBRATE,android.permission.WAKE_LOCK,android.permission.POST_NOTIFICATIONS
 
 android.api = 33
