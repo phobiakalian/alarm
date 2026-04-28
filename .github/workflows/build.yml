@@ -1,4 +1,4 @@
-name: 🚨 Alarm APK - Ubuntu 24.04 FINAL FIX
+name: 🚨 Alarm APK - Ubuntu 24.04 FINAL
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     - name: 📥 Checkout
       uses: actions/checkout@v4
     
-    - name: 💾 Cache Everything
+    - name: 💾 Cache
       uses: actions/cache@v4
       with:
         path: |
@@ -20,53 +20,41 @@ jobs:
           .buildozer
           ~/.gradle
           ~/.android
-        key: ${{ runner.os }}-alarmku-v3-${{ hashFiles('**/*') }}
+        key: ${{ runner.os }}-alarmku-v4-${{ hashFiles('**/*') }}
     
-    - name: 🐍 Python 3.11
+    - name: 🐍 Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: 📦 Ubuntu 24.04 MINIMAL Dependencies (FIXED)
+    - name: 📦 Ubuntu 24.04 Dependencies
       run: |
         pip install --upgrade pip setuptools wheel cython
         pip install buildozer==1.5.0 kivy==2.3.0 plyer==2.1.0
         
         sudo apt update -qq
         sudo apt install -y -qq \
-          # Core
           git zip unzip openjdk-17-jdk-headless python3-pip autoconf libtool pkg-config \
-          # NCurses
-          libncurses6 libtinfo6 \
-          # Crypto/Image
-          cmake libffi-dev libssl-dev libjpeg-dev libpng-dev \
-          # OpenGL (Ubuntu 24.04)
+          libncurses6 libtinfo6 cmake libffi-dev libssl-dev libjpeg-dev libpng-dev \
           libgl1 libglu1-mesa libgl1-mesa-dri libglx-mesa0 \
-          # X11 minimal
           libx11-dev libxext-dev libxrandr-dev libxrender-dev libxi-dev libxfixes-dev
-          
-        # Verify installs
-        dpkg -l | grep libgl || echo "GL libs OK"
     
-    - name: 🔨 Build APK (Verbose)
+    - name: 🔨 Build APK
+      env:
+        USE_CCACHE: 1  # ✅ FIXED: Di env block!
       run: |
         buildozer init
         buildozer -v android debug
-      env:
-        USE_CCACHE=1
     
-    - name: 📤 Upload APK v4
+    - name: 📤 Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: AlarmKu-FINAL-${{ github.run_number }}.apk
-        path: |
-          bin/*.apk
+        name: AlarmKu-${{ github.run_number }}.apk
+        path: bin/*.apk
         retention-days: 60
     
-    - name: 📋 Debug Info
+    - name: 📋 Debug
       if: always()
       run: |
-        echo "=== FILES ==="
-        ls -la bin/
-        echo "=== SIZE ==="
-        du -sh bin/* 2>/dev/null || echo "No APK?"
+        ls -la bin/ || echo "No bin folder"
+        find . -name "*.apk" -type f || echo "No APK found"
