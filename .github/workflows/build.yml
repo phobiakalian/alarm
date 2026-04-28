@@ -14,7 +14,7 @@ jobs:
     - run: |
         rm -rf bin/ .buildozer/
         echo "[app]" > buildozer.spec
-        echo "title = AlarmKu" > buildozer.spec
+        echo "title = AlarmKu" >> buildozer.spec
         echo "package.name = alarmku" >> buildozer.spec  
         echo "package.domain = org.phobiakalian.alarmku" >> buildozer.spec
         echo "requirements = python3,kivy,plyer" >> buildozer.spec
