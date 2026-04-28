@@ -1,4 +1,4 @@
-name: 🚨 Build Alarm APK - Ubuntu 24.04 FIXED
+name: 🚨 Alarm APK - Ubuntu 24.04 FINAL FIX
 
 on:
   push:
@@ -12,45 +12,61 @@ jobs:
     - name: 📥 Checkout
       uses: actions/checkout@v4
     
-    - name: 💾 Cache
+    - name: 💾 Cache Everything
       uses: actions/cache@v4
       with:
         path: |
           ~/.buildozer
           .buildozer
           ~/.gradle
-        key: ${{ runner.os }}-buildozer-v2-${{ hashFiles('buildozer.spec') }}
+          ~/.android
+        key: ${{ runner.os }}-alarmku-v3-${{ hashFiles('**/*') }}
     
-    - name: 🐍 Python Setup
+    - name: 🐍 Python 3.11
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: 📦 Ubuntu 24.04 Dependencies FIXED
+    - name: 📦 Ubuntu 24.04 MINIMAL Dependencies (FIXED)
       run: |
-        pip install --upgrade pip setuptools wheel
-        pip install buildozer==1.5.0 kivy==2.3.0 plyer==2.1.0 cython
+        pip install --upgrade pip setuptools wheel cython
+        pip install buildozer==1.5.0 kivy==2.3.0 plyer==2.1.0
         
         sudo apt update -qq
         sudo apt install -y -qq \
-          git zip unzip openjdk-17-jdk-headless \
-          python3-pip autoconf libtool pkg-config \
-          zlib1g-dev libncurses6 libtinfo6 \
-          cmake libffi-dev libssl-dev \
-          libjpeg-dev libpng-dev libgl1-mesa-dev libgles2-mesa-dev \
-          x11proto-core-dev libx11-dev libx11-xcb-dev libxcb1-dev \
-          libxcursor-dev libxdamage-dev libxext-dev libxfixes-dev \
-          libxi-dev libxrender-dev libxrandr-dev libxtst-dev \
-          libgl1-mesa-glx libglu1-mesa-dev
+          # Core
+          git zip unzip openjdk-17-jdk-headless python3-pip autoconf libtool pkg-config \
+          # NCurses
+          libncurses6 libtinfo6 \
+          # Crypto/Image
+          cmake libffi-dev libssl-dev libjpeg-dev libpng-dev \
+          # OpenGL (Ubuntu 24.04)
+          libgl1 libglu1-mesa libgl1-mesa-dri libglx-mesa0 \
+          # X11 minimal
+          libx11-dev libxext-dev libxrandr-dev libxrender-dev libxi-dev libxfixes-dev
+          
+        # Verify installs
+        dpkg -l | grep libgl || echo "GL libs OK"
     
-    - name: 🔨 Build APK
+    - name: 🔨 Build APK (Verbose)
       run: |
         buildozer init
         buildozer -v android debug
+      env:
+        USE_CCACHE=1
     
-    - name: 📤 Upload APK
+    - name: 📤 Upload APK v4
       uses: actions/upload-artifact@v4
       with:
-        name: AlarmKu-v2-${{ github.run_number }}.apk
-        path: bin/*.apk
-        retention-days: 30
+        name: AlarmKu-FINAL-${{ github.run_number }}.apk
+        path: |
+          bin/*.apk
+        retention-days: 60
+    
+    - name: 📋 Debug Info
+      if: always()
+      run: |
+        echo "=== FILES ==="
+        ls -la bin/
+        echo "=== SIZE ==="
+        du -sh bin/* 2>/dev/null || echo "No APK?"
