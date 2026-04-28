@@ -26,20 +26,22 @@ jobs:
       run: |
         pip install buildozer "cython<3" pkgconfig setuptools
 
-    - name: Pre-accept Android SDK licenses ⭐ CRITICAL
+    # ✅ CRITICAL: Pre-accept licenses & install build-tools BEFORE buildozer runs
+    - name: Setup Android SDK licenses & build-tools
       run: |
-        # Create licenses directory
-        mkdir -p $ANDROID_HOME/licenses
+        # Use system Android SDK path (already installed on GitHub runner)
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export ANDROID_HOME=$ANDROID_SDK_ROOT
         
-        # Copy pre-accepted license hashes (standard for CI)
-        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license
-        echo "84831b9409646a918e30573bab4c9c91346d8abd" >> $ANDROID_HOME/licenses/android-sdk-license
-        echo "d975f751698a77b662f1254ddbeed3901e976f5a" >> $ANDROID_HOME/licenses/android-sdk-license
-        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-preview-license
-        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-preview-license
+        # Accept all licenses programmatically
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
         
-        # Optional: Install specific build-tools via sdkmanager if needed
-        # $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" --licenses
+        # Install specific build-tools version that we pinned
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33"
+        
+        # Also copy licenses to buildozer's expected location (backup)
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        cp -r $ANDROID_SDK_ROOT/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ 2>/dev/null || true
 
     - name: Clean previous builds
       run: |
