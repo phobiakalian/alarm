@@ -4,7 +4,7 @@ on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60  # ✅ Beri waktu cukup untuk build
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v4
 
@@ -12,10 +12,10 @@ jobs:
       with:
         python-version: '3.11'
 
-    - uses: actions/setup-java@v4  # ✅ Explicit Java setup
+    - uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'  # ✅ Java 17 paling stabil untuk p4a
+        java-version: '17'
 
     - name: Install system dependencies
       run: |
@@ -26,14 +26,28 @@ jobs:
       run: |
         pip install buildozer "cython<3" pkgconfig setuptools
 
+    - name: Pre-accept Android SDK licenses ⭐ CRITICAL
+      run: |
+        # Create licenses directory
+        mkdir -p $ANDROID_HOME/licenses
+        
+        # Copy pre-accepted license hashes (standard for CI)
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" >> $ANDROID_HOME/licenses/android-sdk-license
+        echo "d975f751698a77b662f1254ddbeed3901e976f5a" >> $ANDROID_HOME/licenses/android-sdk-license
+        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-preview-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-preview-license
+        
+        # Optional: Install specific build-tools via sdkmanager if needed
+        # $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" --licenses
+
     - name: Clean previous builds
       run: |
         rm -rf .buildozer/bin .buildozer/android/platform/build*
-        
+
     - name: Build APK
       run: |
         test -f buildozer.spec || (echo "❌ buildozer.spec tidak ditemukan!" && exit 1)
-        # ✅ Tambahkan flag verbose untuk debug lebih detail
         buildozer -v android debug
 
     - uses: actions/upload-artifact@v4
