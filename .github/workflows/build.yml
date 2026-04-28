@@ -3,13 +3,19 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # Lebih stabil untuk Android NDK
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60  # ✅ Beri waktu cukup untuk build
     steps:
     - uses: actions/checkout@v4
 
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+
+    - uses: actions/setup-java@v4  # ✅ Explicit Java setup
+      with:
+        distribution: 'temurin'
+        java-version: '17'  # ✅ Java 17 paling stabil untuk p4a
 
     - name: Install system dependencies
       run: |
@@ -18,13 +24,17 @@ jobs:
 
     - name: Install Buildozer & compatible Cython
       run: |
-        # ✅ Critical: Cython < 3 untuk kompatibilitas dengan python-for-android
         pip install buildozer "cython<3" pkgconfig setuptools
 
+    - name: Clean previous builds
+      run: |
+        rm -rf .buildozer/bin .buildozer/android/platform/build*
+        
     - name: Build APK
       run: |
         test -f buildozer.spec || (echo "❌ buildozer.spec tidak ditemukan!" && exit 1)
-        buildozer android debug
+        # ✅ Tambahkan flag verbose untuk debug lebih detail
+        buildozer -v android debug
 
     - uses: actions/upload-artifact@v4
       with:
