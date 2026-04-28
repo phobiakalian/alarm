@@ -1,0 +1,36 @@
+name: 🚨 Build Alarm APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.buildozer
+          .buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+    
+    - name: Setup
+      run: |
+        pip install buildozer kivy plyer
+        sudo apt update -qq
+        sudo apt install -y -qq openjdk-17-jdk python3-pip git zip unzip libncurses5-dev libssl-dev
+    
+    - name: Build APK
+      run: buildozer android debug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: AlarmKu-${{ github.run_number }}.apk
+        path: bin/*.apk
+        retention-days: 30
