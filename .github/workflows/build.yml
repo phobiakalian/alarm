@@ -1,4 +1,4 @@
-name: 🚨 Alarm APK - SYNTAX PERFECT
+name: 🚨 Alarm APK - ULTRA CLEAN
 
 on:
   push:
@@ -15,11 +15,8 @@ jobs:
     - name: Cache
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.buildozer
-          .buildozer
-          ~/.gradle
-        key: ${{ runner.os }}-v6
+        path: ~/.buildozer
+        key: ${{ runner.os }}-v7
     
     - name: Python
       uses: actions/setup-python@v5
@@ -28,43 +25,41 @@ jobs:
     
     - name: Dependencies
       run: |
-        pip install buildozer==1.5.0 kivy==2.3.0 plyer==2.1.0 cython
+        pip install buildozer==1.5.0 kivy==2.3.0 plyer
         
         sudo apt update -qq
         sudo apt install -y -qq git zip unzip openjdk-17-jdk-headless \
           python3-pip autoconf libtool pkg-config libncurses6 libtinfo6 \
           cmake libffi-dev libssl-dev libjpeg-dev libpng-dev libgl1 libglu1-mesa \
-          libx11-dev libxext-dev
+          libx11-dev
     
-    - name: Setup Spec
+    - name: PERFECT Spec Setup
       run: |
         rm -rf .buildozer bin/ buildozer.spec
+        
+        # Generate FRESH spec
         buildozer init
         
-        # Append minimal config
-        echo "[app]" >> buildozer.spec
-        echo "title = AlarmKu" >> buildozer.spec
-        echo "package.name = alarmku" >> buildozer.spec
-        echo "package.domain = org.phobiakalian.alarmku" >> buildozer.spec
-        echo "requirements = python3,kivy,plyer" >> buildozer.spec
-        echo "android.permissions = INTERNET,VIBRATE,WAKE_LOCK" >> buildozer.spec
-        echo "android.api = 33" >> buildozer.spec
-        echo "android.minapi = 21" >> buildozer.spec
-        echo "android.ndk = 25b" >> buildozer.spec
-        echo "[buildozer]" >> buildozer.spec
+        # ✅ EDIT EXISTING [app] section - NO DUPLICATE!
+        sed -i "s/^title = .*/title = AlarmKu/" buildozer.spec
+        sed -i "s/^package.name = .*/package.name = alarmku/" buildozer.spec
+        sed -i "s/^package.domain = .*/package.domain = org.phobiakalian.alarmku/" buildozer.spec
+        sed -i "/^requirements =/c\requirements = python3,kivy,plyer" buildozer.spec
+        sed -i "/^android.permissions =/c\android.permissions = INTERNET,VIBRATE,WAKE_LOCK" buildozer.spec
+        sed -i "s/^android.api = .*/android.api = 33/" buildozer.spec
+        sed -i "s/^android.ndk = .*/android.ndk = 25b/" buildozer.spec
+        
         echo "log_level = 2" >> buildozer.spec
         echo "android.accept_sdk_license = True" >> buildozer.spec
         
+        echo "=== FINAL SPEC ==="
         cat buildozer.spec
     
     - name: Build APK
-      env:
-        USE_CCACHE: 1
       run: buildozer -v android debug
     
-    - name: Upload APK
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: AlarmKu.apk
         path: bin/*.apk
-        retention-days: 30
