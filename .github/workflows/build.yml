@@ -20,7 +20,7 @@ jobs:
         package.name = alarmku
         package.domain = org.phobiakalian.alarmku
         requirements = python3,kivy,plyer
-        android.permissions = android.permission.VIBRATE,android.permission.WAKE_LOCK
+        android.permissions = VIBRATE,WAKE_LOCK
         android.api = 33
         android.ndk = 25b
         log_level = 2
