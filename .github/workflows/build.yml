@@ -38,7 +38,14 @@ jobs:
           libncurses6 libtinfo6 cmake libffi-dev libssl-dev libjpeg-dev libpng-dev \
           libgl1 libglu1-mesa libgl1-mesa-dri libglx-mesa0 \
           libx11-dev libxext-dev libxrandr-dev libxrender-dev libxi-dev libxfixes-dev
-    
+
+    - name: 🔄 Regenerate buildozer.spec
+      run: |
+        rm -f buildozer.spec
+        buildozer init
+        # Edit minimal spec
+        echo "requirements = python3,kivy,plyer" >> buildozer.spec
+        
     - name: 🔨 Build APK
       env:
         USE_CCACHE: 1  # ✅ FIXED: Di env block!
