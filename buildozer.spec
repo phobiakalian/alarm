@@ -5,10 +5,6 @@ package.domain = org.phobiakalian.alarmku
 
 # ✅ VERSI APP (WAJIB ADA)
 version = 1.0
-# Opsional: jika ingin format versi build terpisah
-version.regex = (\d+\.\d+\.\d+)
-version.filename = main.py
-
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 
